@@ -1,5 +1,21 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="my_car">
+<xacro:include filename="$(find my_nav2_pkg)/urdf/lidar.xacro"/>
+
+<gazebo>
+  <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
+    <ros>
+      <namespace>/</namespace>
+      <remapping>odom:=/odom</remapping>
+    </ros>
+    <body_name>base_link</body_name>
+    <frame_name>odom</frame_name>
+    <update_rate>50</update_rate>
+    <gaussian_noise>0.01</gaussian_noise>
+  </plugin>
+</gazebo>
+
+
 
   <!-- ============ Properties ============ -->
   <xacro:property name="wheel_radius" value="0.1"/>
@@ -10,6 +26,7 @@
   <xacro:property name="body_size_z" value="0.2"/>
   <xacro:property name="body_half_z" value="${body_size_z/2}"/> 
   <xacro:property name="wheel_y_offset" value="${body_size_y/2 + wheel_length/2}"/>
+  <xacro:lidar parent_link="base_link"/>
 
   <!-- ============ Materials ============ -->
   <material name="blue"><color rgba="0 0 1 1"/></material>
@@ -159,6 +176,7 @@
     </hardware>
 
     <!-- Steering joints -->
+<!-- Steering joints (position control) -->
     <joint name="front_left_steering_joint">
       <command_interface name="position"/>
       <state_interface name="position"/>
@@ -168,17 +186,17 @@
       <state_interface name="position"/>
     </joint>
 
-    <!-- Wheel joints (all driven) -->
+<!-- Front wheel joints (passive, no command interface) -->
     <joint name="front_left_wheel_joint">
-      <command_interface name="velocity"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
     <joint name="front_right_wheel_joint">
-      <command_interface name="velocity"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
+
+<!-- Rear wheel joints (driven by velocity control) -->
     <joint name="rear_left_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="position"/>
@@ -189,7 +207,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-  </ros2_control>
+</ros2_control>
 
   <!-- ============ Gazebo plugins ============ -->
   <gazebo>
